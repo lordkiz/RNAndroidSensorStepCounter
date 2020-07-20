@@ -8,60 +8,44 @@
 
 import React, {useState} from 'react';
 import {
-  SafeAreaView,
-  StyleSheet,
-  ScrollView,
   View,
   Text,
-  StatusBar,
-  NativeModules,
   TouchableOpacity,
   NativeEventEmitter,
 } from 'react-native';
 
-import {
-  Header,
-  LearnMoreLinks,
-  Colors,
-  DebugInstructions,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
-import ToastExample from './ToastExample';
 import RNAndroidSensorStepCounter from './RNAndroidSensorStepCounter';
 
 async function isReady() {
   try {
     const ready = await RNAndroidSensorStepCounter.ready();
-    console.log('ready', ready);
 
     if (!ready) {
       RNAndroidSensorStepCounter.startService();
+      return true;
     }
+    return ready;
+    
   } catch (e) {
     console.log(e);
+    return false;
   }
 }
 
 const App = () => {
   const [step, setStep] = useState(1);
-  //RNAndroidSensorStepCounter.start();
-  // const steps = RNAndroidSensorStepCounter.getSteps();
 
   const emitter = new NativeEventEmitter(RNAndroidSensorStepCounter);
   emitter.addListener('steps', stepObject => {
-    console.log('stepOBJECT', stepObject);
     setStep(stepObject.steps);
   });
 
-  isReady();
+  const ready = isReady();
 
   return (
     <TouchableOpacity
       onPress={() => {
-        //ToastExample.show('Starting Service', ToastExample.SHORT);
-        RNAndroidSensorStepCounter.startService();
-        const ready = RNAndroidSensorStepCounter.ready();
-        console.log(ready);
+        if (!ready) RNAndroidSensorStepCounter.startService();
       }}>
       <View>
         <Text>Steps: {step} steps</Text>
@@ -70,43 +54,5 @@ const App = () => {
   );
 };
 
-const styles = StyleSheet.create({
-  scrollView: {
-    backgroundColor: Colors.lighter,
-  },
-  engine: {
-    position: 'absolute',
-    right: 0,
-  },
-  body: {
-    backgroundColor: Colors.white,
-  },
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-    color: Colors.black,
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-    color: Colors.dark,
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-  footer: {
-    color: Colors.dark,
-    fontSize: 12,
-    fontWeight: '600',
-    padding: 4,
-    paddingRight: 12,
-    textAlign: 'right',
-  },
-});
 
 export default App;
